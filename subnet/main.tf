@@ -136,3 +136,164 @@ resource "azurerm_network_security_rule" "allow_vnet_outbound" {
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.nsg.0.name
 }
+
+## Azure Bation Rules
+resource "azurerm_network_security_rule" "allow_https_inbound" {
+  count = ((var.subnet_type == "AzureBastionSubnet") ? 1 : 0)
+
+  name                        = "AllowHttpsInBound"
+  priority                    = 100
+  access                      = "Allow"
+  direction                   = "Inbound"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  source_address_prefix       = "Internet"
+  destination_port_range      = "443"
+  destination_address_prefix  = "*"
+  resource_group_name         = var.resource_group_name
+  network_security_group_name = azurerm_network_security_group.nsg.0.name
+}
+
+resource "azurerm_network_security_rule" "allow_gateway_manager_inbound" {
+  count = ((var.subnet_type == "AzureBastionSubnet") ? 1 : 0)
+
+  name                        = "AllowGatewayManagerInBound"
+  priority                    = 110
+  access                      = "Allow"
+  direction                   = "Inbound"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  source_address_prefix       = "GatewayManager"
+  destination_port_range      = "443"
+  destination_address_prefix  = "*"
+  resource_group_name         = var.resource_group_name
+  network_security_group_name = azurerm_network_security_group.nsg.0.name
+}
+
+resource "azurerm_network_security_rule" "allow_load_balancer_inbound" {
+  count = ((var.subnet_type == "AzureBastionSubnet") ? 1 : 0)
+
+  name                        = "AllowLoadBalancerInBound"
+  priority                    = 120
+  access                      = "Allow"
+  direction                   = "Inbound"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  source_address_prefix       = "AzureLoadBalancer"
+  destination_port_range      = "443"
+  destination_address_prefix  = "*"
+  resource_group_name         = var.resource_group_name
+  network_security_group_name = azurerm_network_security_group.nsg.0.name
+}
+
+resource "azurerm_network_security_rule" "allow_bastion_host_inbound" {
+  count = ((var.subnet_type == "AzureBastionSubnet") ? 1 : 0)
+
+  name                        = "AllowBastionHostCommunicationInBound"
+  priority                    = 130
+  access                      = "Allow"
+  direction                   = "Inbound"
+  protocol                    = "*"
+  source_port_range           = "*"
+  source_address_prefix       = "VirtualNetwork"
+  destination_port_ranges     = ["8080", "5701"]
+  destination_address_prefix  = "VirtualNetwork"
+  resource_group_name         = var.resource_group_name
+  network_security_group_name = azurerm_network_security_group.nsg.0.name
+}
+
+# resource "azurerm_network_security_rule" "deny_all_inbound" {
+#   count = ((var.subnet_type == "AzureBastionSubnet") ? 1 : 0)
+
+#   name                        = "DenyAllInBound"
+#   priority                    = 1000
+#   access                      = "Deny"
+#   direction                   = "Inbound"
+#   protocol                    = "*"
+#   source_port_range           = "*"
+#   source_address_prefix       = "*"
+#   destination_port_range      = "*"
+#   destination_address_prefix  = "*"
+#   resource_group_name         = var.resource_group_name
+#   network_security_group_name = azurerm_network_security_group.nsg.0.name
+# }
+
+resource "azurerm_network_security_rule" "allow_ssh_rdp_outbound" {
+  count = ((var.subnet_type == "AzureBastionSubnet") ? 1 : 0)
+
+  name                        = "AllowSshRdpOutBound"
+  priority                    = 100
+  access                      = "Allow"
+  direction                   = "Outbound"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  source_address_prefix       = "*"
+  destination_port_ranges     = ["22", "3389"]
+  destination_address_prefix  = "VirtualNetwork"
+  resource_group_name         = var.resource_group_name
+  network_security_group_name = azurerm_network_security_group.nsg.0.name
+}
+
+resource "azurerm_network_security_rule" "allow_cloud_outbound" {
+  count = ((var.subnet_type == "AzureBastionSubnet") ? 1 : 0)
+
+  name                        = "AllowAzureCloudCommunicationOutBound"
+  priority                    = 110
+  access                      = "Allow"
+  direction                   = "Outbound"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  source_address_prefix       = "*"
+  destination_port_range      = "443"
+  destination_address_prefix  = "AzureCloud"
+  resource_group_name         = var.resource_group_name
+  network_security_group_name = azurerm_network_security_group.nsg.0.name
+}
+
+resource "azurerm_network_security_rule" "allow_bastion_host_outbound" {
+  count = ((var.subnet_type == "AzureBastionSubnet") ? 1 : 0)
+
+  name                        = "AllowBastionHostCommunicationOutBound"
+  priority                    = 120
+  access                      = "Allow"
+  direction                   = "Outbound"
+  protocol                    = "*"
+  source_port_range           = "*"
+  source_address_prefix       = "VirtualNetwork"
+  destination_port_ranges     = ["8080", "5701"]
+  destination_address_prefix  = "VirtualNetwork"
+  resource_group_name         = var.resource_group_name
+  network_security_group_name = azurerm_network_security_group.nsg.0.name
+}
+
+resource "azurerm_network_security_rule" "allow_information_outbound" {
+  count = ((var.subnet_type == "AzureBastionSubnet") ? 1 : 0)
+
+  name                        = "AllowGetSessionInformationOutBound"
+  priority                    = 130
+  access                      = "Allow"
+  direction                   = "Outbound"
+  protocol                    = "*"
+  source_port_range           = "*"
+  source_address_prefix       = "*"
+  destination_port_ranges     = ["80", "443"]
+  destination_address_prefix  = "Internet"
+  resource_group_name         = var.resource_group_name
+  network_security_group_name = azurerm_network_security_group.nsg.0.name
+}
+
+# resource "azurerm_network_security_rule" "deny_all_outbound" {
+#   count = ((var.subnet_type == "AzureBastionSubnet") ? 1 : 0)
+
+#   name                        = "DenyAllOutBound"
+#   priority                    = 1000
+#   access                      = "Deny"
+#   direction                   = "Outbound"
+#   protocol                    = "*"
+#   source_port_range           = "*"
+#   source_address_prefix       = "*"
+#   destination_port_range      = "*"
+#   destination_address_prefix  = "*"
+#   resource_group_name         = var.resource_group_name
+#   network_security_group_name = azurerm_network_security_group.nsg.0.name
+# }

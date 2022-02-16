@@ -42,16 +42,18 @@ module "network" {
 
       allow_vnet_inbound = true
     }
-    Mgmt-Tier = {
+    AzureBastionSubnet = {
       cidrs = ["10.0.1.192/27"]
 
       create_network_security_group = true
+      configure_nsg_rules           = true
     }
     GatewaySubnet = {
       cidrs = ["10.0.1.224/28"]
 
       create_network_security_group = false
     }
+
   }
 
   # Tags
