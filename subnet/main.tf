@@ -27,6 +27,21 @@ resource "azurerm_subnet" "subnet" {
 
 resource "azurerm_subnet_network_security_group_association" "subnet_nsg" {
   count = (var.create_network_security_group ? 1 : 0)
+  depends_on = [
+    azurerm_network_security_rule.deny_all_inbound,
+    azurerm_network_security_rule.deny_all_outbound,
+    azurerm_network_security_rule.allow_lb_inbound,
+    azurerm_network_security_rule.allow_internet_outbound,
+    azurerm_network_security_rule.allow_vnet_outbound,
+    azurerm_network_security_rule.allow_https_inbound,
+    azurerm_network_security_rule.allow_gateway_manager_inbound,
+    azurerm_network_security_rule.allow_load_balancer_inbound,
+    azurerm_network_security_rule.allow_bastion_host_inbound,
+    azurerm_network_security_rule.allow_ssh_rdp_outbound,
+    azurerm_network_security_rule.allow_cloud_outbound,
+    azurerm_network_security_rule.allow_bastion_host_outbound,
+    azurerm_network_security_rule.allow_information_outbound
+  ]
 
   subnet_id                 = azurerm_subnet.subnet.id
   network_security_group_id = azurerm_network_security_group.nsg.0.id
@@ -202,22 +217,6 @@ resource "azurerm_network_security_rule" "allow_bastion_host_inbound" {
   network_security_group_name = azurerm_network_security_group.nsg.0.name
 }
 
-# resource "azurerm_network_security_rule" "deny_all_inbound" {
-#   count = ((var.subnet_type == "AzureBastionSubnet") ? 1 : 0)
-
-#   name                        = "DenyAllInBound"
-#   priority                    = 1000
-#   access                      = "Deny"
-#   direction                   = "Inbound"
-#   protocol                    = "*"
-#   source_port_range           = "*"
-#   source_address_prefix       = "*"
-#   destination_port_range      = "*"
-#   destination_address_prefix  = "*"
-#   resource_group_name         = var.resource_group_name
-#   network_security_group_name = azurerm_network_security_group.nsg.0.name
-# }
-
 resource "azurerm_network_security_rule" "allow_ssh_rdp_outbound" {
   count = ((var.subnet_type == "AzureBastionSubnet") ? 1 : 0)
 
@@ -281,19 +280,3 @@ resource "azurerm_network_security_rule" "allow_information_outbound" {
   resource_group_name         = var.resource_group_name
   network_security_group_name = azurerm_network_security_group.nsg.0.name
 }
-
-# resource "azurerm_network_security_rule" "deny_all_outbound" {
-#   count = ((var.subnet_type == "AzureBastionSubnet") ? 1 : 0)
-
-#   name                        = "DenyAllOutBound"
-#   priority                    = 1000
-#   access                      = "Deny"
-#   direction                   = "Outbound"
-#   protocol                    = "*"
-#   source_port_range           = "*"
-#   source_address_prefix       = "*"
-#   destination_port_range      = "*"
-#   destination_address_prefix  = "*"
-#   resource_group_name         = var.resource_group_name
-#   network_security_group_name = azurerm_network_security_group.nsg.0.name
-# }
